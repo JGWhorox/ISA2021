@@ -1,7 +1,7 @@
 #ifndef PCAPDATATYPES_H
 #define PCAPDATATYPES_H
 
-#include "stdint.h"
+#include <cstdint>
 
 #define ETHERNET_TYPE_IPV4 0x0800
 #define ETHERNET_TYPE_IPV6 0x86DD
@@ -26,7 +26,7 @@
 
 #define SWAP(num) (((num>>8) & 0xFF) | ((num&0xFF)<<8)) // swaps 2 lower bytes 
 
-typedef struct {
+/*typedef struct {
     uint64_t array[2];
 } ipv6Address;
 typedef uint32_t ipv4Address;
@@ -38,26 +38,25 @@ typedef struct {
         ipv6Address v6;
         ipv4Address v4;
     } addr;
-}ipAddress;
+}ipAddress;*/
 
 // contains information about packet 
-typedef struct {
+/*typedef struct {
     ipAddress srcAddr;
     ipAddress dstAddr;
     int32_t srcPort;
     uint16_t TLSBytes;
-} TpacketDetail;
+} TpacketDetail;*/
 
-typedef struct
-{
+#pragma pack(push, 1)
+
+struct ethernet2_header{
     uint8_t dest[6];
     uint8_t source[6];
     uint16_t type;
-    uint8_t data[];
-} __attribute__((packed)) ethernet2_header;
+};
 
-typedef struct
-{
+struct ipv4_header{
     uint8_t hlen : 4,
         ver : 4;
     uint8_t tos;
@@ -69,11 +68,9 @@ typedef struct
     uint16_t csum;
     uint32_t srcAddr;
     uint32_t dstAddr;
-    uint8_t data[];
-} __attribute__((packed)) ipv4_header;
+};
 
-typedef struct
-{
+struct ipv6_header{
     uint32_t ver : 4,
         priority_traffic : 8,
         flow : 20;
@@ -82,26 +79,31 @@ typedef struct
     uint8_t  hopLimit;
     uint64_t srcAddrV6[2];
     uint64_t dstAddrV6[2];
-    uint8_t data[];
-} __attribute__((packed)) ipv6_header;
+};
 
-typedef struct
-{
+struct ipv6_ext_header{
     uint8_t nextHeader;
     uint8_t extLength;
     uint16_t options;
     uint32_t padding;
-    uint8_t data[];
-} __attribute__((packed)) ipv6_ext_header;
+};
 
-typedef struct
-{
+struct udpHeader{
     uint16_t srcPort;
     uint16_t dstPort;
     uint16_t length;
     uint16_t checksum;
-    uint8_t data[];
-}__attribute__((packed)) udpHeader;
+};
+
+#pragma pack(pop)
+
+enum tftpOpcode: uint16_t{
+    RRQ = 1,
+    WRQ,
+    ACK,
+    DAT,
+    ERR
+};
 
 
 
