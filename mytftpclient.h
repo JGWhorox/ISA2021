@@ -1,6 +1,6 @@
 /**
  * author Johann A. Gawron - xgawro00
- * file argparser.h
+ * file mytftpclient.h
  * brief main program declarations
  */
 

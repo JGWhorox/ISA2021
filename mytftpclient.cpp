@@ -1,7 +1,7 @@
 /**
  * author Johann A. Gawron - xgawro00
- * file argparser.h
- * brief main program declarations
+ * file mytftpclient.cpp
+ * brief main program code
  */
 
 
@@ -12,6 +12,7 @@
 #include <sstream>
 #include <arpa/inet.h>
 #include <sys/socket.h>
+
 //custom
 #include "pcapDataTypes.h"
 #include "mytftpclient.h"
@@ -22,7 +23,10 @@ using namespace std;
 
 
 int main(int argc, char** argv){
-
+    
+    if(argc > 1){
+        printHelp();
+    }
     Arguments args;
     
     /*
@@ -35,17 +39,20 @@ int main(int argc, char** argv){
     }
     */
 
+    //main CLI interface loop 
     while(1){
+        
         string input;
         getline(cin, input);
+        
         if(parseArgs(args, input)){
             //write 
             if(args.write){ 
-
+                //implement upload functionality
             }
             //read
             else{
-
+                //implement download functionality
             }
             
         }

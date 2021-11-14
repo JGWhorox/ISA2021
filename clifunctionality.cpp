@@ -169,7 +169,7 @@ bool parseArgs(Arguments &args, string input){
         cerr << "file path needs to be set" << endl;
         return false;
     }
-    printDebug(args);
+    //printDebug(args);
     return true;
 }
 
