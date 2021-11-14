@@ -10,7 +10,6 @@
 #include <vector>
 #include <sstream>
 #include <cstdio>
-#include <algorithm>
 
 #include "clifunctionality.h"
 
@@ -51,6 +50,18 @@ bool parseArgs(Arguments &args, string input){
         else if(*it == "-d"){
             if(it+1 != splitInput.end()){
                 args.filePath = *(++it);
+            }
+        }
+        else if(*it == "-t"){
+            if(it+1 != splitInput.end()){
+                try{
+                    int tryIfInt = stoi(*(++it));
+                    args.timeout = tryIfInt;
+                }
+                catch (const std::exception&){
+                    cout << "timeout needs to be in seconds" << endl;
+                    return false;
+                }             
             }
         }
         else{
