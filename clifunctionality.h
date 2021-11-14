@@ -8,6 +8,7 @@
 #define CLIFUNCTIONALITY_H
 
 #include <string>
+#include <vector>
 
 struct Arguments {
     bool write = false; // if not write then read
@@ -15,9 +16,9 @@ struct Arguments {
     int timeout = 5; //in seconds
     int blockSize = 256;
     bool multicast = false;
-    int binaryMode = true; //of not binary then ascii
+    bool binaryMode = true; //of not binary then ascii
     std::string address = "127.0.0.1";   
-    std::string port = "69";
+    uint16_t port = 69;
 };
 
 

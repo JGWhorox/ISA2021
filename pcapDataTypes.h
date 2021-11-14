@@ -94,14 +94,18 @@ struct udpHeader{
     uint16_t length;
     uint16_t checksum;
 };
+struct tftpRcv{
+    uint16_t opcode;
+    uint16_t blockid;
+};
 
 #pragma pack(pop)
 
 enum tftpOpcode: uint16_t{
     RRQ = 1,
     WRQ,
-    ACK,
     DAT,
+    ACK,
     ERR
 };
 

@@ -1,2 +1,2 @@
 run:
-	g++ -std=c++11 mytftpclient.cpp clifunctionality.cpp -o mytftpclient
+	g++ -std=c++11 mytftpclient.cpp clifunctionality.cpp tftpSocket.cpp -o mytftpclient

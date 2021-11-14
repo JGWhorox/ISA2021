@@ -148,8 +148,10 @@ bool parseArgs(Arguments &args, string input){
                     return false;
                 }
 
+                uint16_t convertedPort = stoi(port);
+
                 args.address = address;
-                args.port = port;
+                args.port = convertedPort;
             }
         }
         else{

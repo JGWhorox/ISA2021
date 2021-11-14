@@ -17,6 +17,7 @@
 #include "pcapDataTypes.h"
 #include "mytftpclient.h"
 #include "clifunctionality.h"
+#include "tftpSocket.h"
 
 
 using namespace std;
@@ -48,11 +49,11 @@ int main(int argc, char** argv){
         if(parseArgs(args, input)){
             //write 
             if(args.write){ 
-                //implement upload functionality
+                cout << "placeholder wiruting" << endl;
             }
             //read
             else{
-                //implement download functionality
+                readFromServer(args);
             }
             
         }
