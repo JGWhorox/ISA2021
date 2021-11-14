@@ -38,19 +38,20 @@ bool parseArgs(Arguments &args, string input){
     vector<string> splitInput = split(input);
 
     bool foundRW = false;
-    
 
-    for(auto& str : splitInput){
-        if((str == "-R") && (!foundRW)){
+    for(auto it = splitInput.begin(); it != splitInput.end(); ++it){
+        if((*it == "-R") && (!foundRW)){
             foundRW = true;
             cout << "found -R \n";
         }
-        else if((str == "-W")&&(!foundRW)){
+        else if((*it == "-W") && (!foundRW)){
             foundRW = true;
             cout << "found -W \n";
         }
-        else if(0){
-            
+        else if(*it == "-d"){
+            if(it+1 != splitInput.end()){
+                args.filePath = *(++it);
+            }
         }
         else{
             return false;
@@ -58,7 +59,7 @@ bool parseArgs(Arguments &args, string input){
 
     }
     
-
+    //cout << args.filePath;
 
     return true;
 }
