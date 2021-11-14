@@ -50,9 +50,8 @@ int main(int argc, char** argv){
             
         }
         else{
-            cout << "Given arguments are incorrect!!!" << endl;
+            cerr << "Given arguments are incorrect!!!" << endl;
             printHelp();
-            break;
         }
     }
     return 0;

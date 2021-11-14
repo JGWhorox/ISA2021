@@ -77,7 +77,7 @@ bool parseArgs(Arguments &args, string input){
                     args.timeout = tryIfInt;
                 }
                 catch (const std::exception&){
-                    cout << "timeout needs to be given as integer" << endl;
+                    cerr << "timeout needs to be given as integer" << endl;
                     return false;
                 }             
             }
@@ -90,7 +90,7 @@ bool parseArgs(Arguments &args, string input){
                     args.blockSize = tryIfInt;
                 }
                 catch (const std::exception&){
-                    cout << "blocksize needs to be given as integer" << endl;
+                    cerr << "blocksize needs to be given as integer" << endl;
                     return false;
                 }             
             }
@@ -106,6 +106,13 @@ bool parseArgs(Arguments &args, string input){
                 if((mode == "ascii") || (mode == "netascii")){
                     args.binaryMode = false;
                 }
+                else if((mode == "octane") || (mode == "binary")){
+                    args.binaryMode = true;
+                }
+                else{
+                    cerr << "Invalid option for -c \n";
+                    return false;
+                }
             }
         }
         //address
@@ -120,11 +127,11 @@ bool parseArgs(Arguments &args, string input){
                 regex regex_ipv6("((([0-9a-fA-F]){1,4})\\:){7}([0-9a-fA-F]){1,4}");
                 regex regex_port("^([0-9]{1,4}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$");
                 if((!regex_match(address, regex_ipv4)) && (!regex_match(address, regex_ipv6))){
-                    cout << "Invalid IP address!\n";
+                    cerr << "Invalid IP address!\n";
                     return false;
                 }
                 if(!regex_match(port, regex_port)){
-                    cout << "Invalid port number!\n";
+                    cerr << "Invalid port number!\n";
                     return false;
                 }
 
@@ -142,7 +149,7 @@ bool parseArgs(Arguments &args, string input){
     
     
     if(!foundRW){
-        cout << "-R/-W is a mandatory flag!" << endl;
+        cerr << "-R/-W is a mandatory flag!" << endl;
         return false;
     }
 
