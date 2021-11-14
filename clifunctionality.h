@@ -16,7 +16,8 @@ struct Arguments {
     int blockSize = 256;
     bool multicast = false;
     int binaryMode = true; //of not binary then ascii
-    std::string address = "127.0.0.1,69";   
+    std::string address = "127.0.0.1";   
+    std::string port = "69";
 };
 
 

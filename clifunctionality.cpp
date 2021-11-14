@@ -10,6 +10,8 @@
 #include <vector>
 #include <sstream>
 #include <cstdio>
+#include <bits/stdc++.h>
+#include <arpa/inet.h>
 
 #include "clifunctionality.h"
 
@@ -25,7 +27,7 @@ std::vector<string> split(string input){
 }
 
 void printDebug(Arguments &args){
-    cout << "############# DEBUG INFO #############" << endl;
+    cout << "############## DEBUG INFO ##############" << endl;
     cout << "write?: \t" << args.write << endl;
     cout << "file path:\t " << args.filePath << endl;
     cout << "timeout:\t" << args.timeout << endl;
@@ -33,6 +35,8 @@ void printDebug(Arguments &args){
     cout << "multicast?:\t" << args.multicast << endl;
     cout << "bin mode?:\t" << args.binaryMode << endl;
     cout << "address:\t" << args.address << endl;
+    cout << "port:   \t" << args.port << endl;
+    cout << "############# END OF DEBUG #############" << endl;
 }
 
 void printHelp(){
@@ -108,9 +112,24 @@ bool parseArgs(Arguments &args, string input){
         else if(*it == "-a"){
             if(it+1 != splitInput.end()){
                 auto address = *(++it);
-                string ip = address.substr(0,address.find(","));
+            
                 string port = address.substr(address.find(",")+1,address.length());
-                cout << ip << "< toz ip a toz port >" << port << endl;
+                address = address.substr(0,address.find(","));
+
+                regex regex_ipv4("(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])");
+                regex regex_ipv6("((([0-9a-fA-F]){1,4})\\:){7}([0-9a-fA-F]){1,4}");
+                regex regex_port("^([0-9]{1,4}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$");
+                if((!regex_match(address, regex_ipv4)) && (!regex_match(address, regex_ipv6))){
+                    cout << "Invalid IP address!\n";
+                    return false;
+                }
+                if(!regex_match(port, regex_port)){
+                    cout << "Invalid port number!\n";
+                    return false;
+                }
+
+                args.address = address;
+                args.port = port;
             }
         }
         else{
@@ -123,6 +142,7 @@ bool parseArgs(Arguments &args, string input){
     
     
     if(!foundRW){
+        cout << "-R/-W is a mandatory flag!" << endl;
         return false;
     }
 
