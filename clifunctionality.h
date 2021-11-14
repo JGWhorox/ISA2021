@@ -14,8 +14,8 @@ struct Arguments {
     std::string filePath = "";
     int timeout = 5; //in seconds
     int blockSize = 256;
-    bool muticast = false;
-    int mode = 0; // 0 - not assigned, 1 ascii or netascii, 2 binary or octet
+    bool multicast = false;
+    int binaryMode = true; //of not binary then ascii
     std::string address = "127.0.0.1,69";   
 };
 
