@@ -19,6 +19,7 @@ struct Arguments {
     bool binaryMode = true; //of not binary then ascii
     std::string address = "127.0.0.1";   
     uint16_t port = 69;
+    bool ipv4 = true;
 };
 
 
