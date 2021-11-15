@@ -39,7 +39,7 @@ int main(int argc, char** argv){
         cout << str << endl;
     }
     */
-
+    
     //main CLI interface loop 
     while(1){
         
@@ -49,7 +49,7 @@ int main(int argc, char** argv){
         if(parseArgs(args, input)){
             //write 
             if(args.write){ 
-                cout << "placeholder wiruting" << endl;
+                writeToServer(args);
             }
             //read
             else{

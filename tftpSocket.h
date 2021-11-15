@@ -13,5 +13,7 @@
 
 bool readFromServer(const Arguments& args);
 
+bool writeToServer(const Arguments& args);
+
 
 #endif
