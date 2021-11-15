@@ -39,15 +39,28 @@ int main(int argc, char** argv){
         if(parseArgs(args, input)){
             //write 
             if(args.write){ 
-                writeToServer(args);
+                if(args.ipv4){
+                    if(writeToServer(args)){
+                        cout << "Upload completed!" << endl;
+                    }
+                }
+                else{
+                    if(writeToServerInIPv6(args)){
+                        cout << "Upload completed!" << endl;
+                    }
+                }              
             }
             //read
             else{
                 if(args.ipv4){
-                    readFromServer(args);
+                    if(readFromServer(args)){
+                        cout << "Download completed!" << endl;
+                    }
                 }
                 else{
-                    readFromServerInIPv6(args);
+                    if(readFromServerInIPv6(args)){
+                        cout << "Download completed!" << endl;
+                    }
                 }                  
             }
             

@@ -286,3 +286,109 @@ bool writeToServer(const Arguments& args){
     }
     return true;
 }
+
+bool writeToServerInIPv6(const Arguments& args){
+    struct sockaddr_in6 server_addr;
+
+    int sock = socket(AF_INET6,SOCK_DGRAM,IPPROTO_UDP);
+    if (sock < 0){
+        return false;
+    }
+    timeval timeout = {};
+    timeout.tv_usec = args.timeout*1000000;
+
+    setsockopt(sock,SOL_SOCKET,SO_RCVTIMEO,reinterpret_cast<const char*>(&timeout), sizeof (timeout)); 
+
+    server_addr.sin6_family = AF_INET6;
+    server_addr.sin6_port = htons(args.port);
+    
+    if(inet_pton(AF_INET6, args.address.c_str(), &server_addr.sin6_addr)<=0){
+        cerr << "\nInvalid address/ Address not supported \n";
+        return false;
+    }
+
+    uint8_t* index = udpBuffer;
+
+    *((uint16_t*)udpBuffer) = SWAP((uint16_t)tftpOpcode::WRQ);
+    index += 2;
+
+    memcpy(index,args.filePath.c_str(),args.filePath.length()+1);
+    index+= args.filePath.length()+1;
+
+    if(args.binaryMode){
+        memcpy(index, modeBinary, sizeof(modeBinary));
+        index += sizeof(modeBinary);
+    }
+    else{
+        memcpy(index, modeAscii, sizeof(modeAscii));
+        index += sizeof(modeAscii);
+    }
+
+    ifstream myfile(args.filePath,ios::binary);
+    auto result = sendto (sock, udpBuffer, index-udpBuffer, 0, (struct sockaddr *)&server_addr, sizeof(server_addr));
+
+
+    cout << "Requesting write to server: " << args.address << " on port: " << args.port << endl;
+    
+
+    if (result > 0){      
+        
+        int n;
+        //we need to get the port in the response to know where to send ACK
+        sockaddr_in6 session; 
+        int len = sizeof(session);
+        // we get port for the service in the response (1st data packet)
+        n = recvfrom(sock, udpBuffer, sizeof(udpBuffer), 0, (struct sockaddr *)&session, (socklen_t *)&len);
+
+        if(*((uint16_t*)udpBuffer) == SWAP((uint16_t)tftpOpcode::ACK)){
+            cout << "ACK from server, transmitting data..." << endl;   
+        }
+
+        uint64_t x = 0;
+        uint16_t blockcount = 0;
+        
+        do{
+            index = udpBuffer;
+
+            *(uint16_t*)udpBuffer = SWAP((uint16_t)tftpOpcode::DAT);
+            index += 2;
+
+            blockcount++;
+
+            *(uint16_t*)index = SWAP(blockcount);
+            index += 2;
+            
+            char tmpBuffer[args.blockSize];
+
+            myfile.read(tmpBuffer, sizeof(tmpBuffer));
+
+            memcpy(index,tmpBuffer,myfile.gcount());
+
+           
+            index += myfile.gcount();
+            
+            
+            int res = sendto (sock, udpBuffer, index-udpBuffer, 0, (struct sockaddr *)&session, sizeof(session));
+            if(res){
+                n = recvfrom(sock, udpBuffer, sizeof(udpBuffer), 0, (struct sockaddr *)&session, (socklen_t *)&len);
+                if(!n){
+                    return false;
+                }
+                if(!(*((uint16_t*)udpBuffer) == SWAP((uint16_t)tftpOpcode::ACK))){
+                    cerr << "server didnt send ACK back" << endl;
+                    return false;
+                }
+                if(*((uint16_t*)udpBuffer) == SWAP((uint16_t)tftpOpcode::ACK)){
+                    x += myfile.gcount();
+                    cout << x << "B transferred" << "\t\r" << flush;
+                }
+            }
+
+            
+        }while(myfile); // myfile returns false, when he couldn't fill the entire buffer given to him in read
+        
+        myfile.close();
+        cout << endl;
+    }
+    return true;
+}

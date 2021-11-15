@@ -23,5 +23,7 @@ bool readFromServerInIPv6(const Arguments& args);
 
 bool writeToServer(const Arguments& args);
 
+bool writeToServerInIPv6(const Arguments& args);
+
 
 #endif
