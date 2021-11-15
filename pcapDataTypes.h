@@ -24,7 +24,7 @@
 #define  TYPE_IPV4 0
 #define  TYPE_IPV6 1
 
-#define SWAP(num) (((num>>8) & 0xFF) | ((num&0xFF)<<8)) // swaps 2 lower bytes 
+static inline uint16_t SWAP(uint16_t val) { return (((val << 8 ) & 0xFF00) | ((val >> 8 )& 0x00FF)); };
 
 /*typedef struct {
     uint64_t array[2];
