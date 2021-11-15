@@ -101,6 +101,9 @@ bool parseArgs(Arguments &args, string input){
                 catch (const std::exception&){
                     cerr << "blocksize needs to be given as integer" << endl;
                     return false;
+                }
+                if (args.blockSize < 512){
+                    cerr << "minimal size of blockSize is 512" << endl;
                 }             
             }
         }
