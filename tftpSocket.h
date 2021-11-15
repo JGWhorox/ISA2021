@@ -17,13 +17,15 @@
 #include "pcapDataTypes.h"
 #include "clifunctionality.h"
 
-bool readFromServer(const Arguments& args);
+bool checkError(uint8_t* buffer);
 
-bool readFromServerInIPv6(const Arguments& args);
+bool readFromServer(Arguments& args);
 
-bool writeToServer(const Arguments& args);
+bool readFromServerInIPv6(Arguments& args);
 
-bool writeToServerInIPv6(const Arguments& args);
+bool writeToServer(Arguments& args);
+
+bool writeToServerInIPv6(Arguments& args);
 
 
 #endif

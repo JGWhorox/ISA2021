@@ -11,6 +11,7 @@
 #include <string>
 #include <cstring>
 #include <fstream>
+#include <filesystem>
 //custom
 #include "tftpSocket.h"
 #include "pcapDataTypes.h"
@@ -28,8 +29,15 @@ const static char modeAscii[] = "netascii";
 const static char transfer[] = "tsize";
 const static char blck[] = "blksize";
 
+bool checkError(uint8_t* buffer){   
+    if((*(uint16_t*)udpBuffer == SWAP((uint16_t)tftpOpcode::ERR))){
+        cerr << "Error #" << *(uint16_t*)(buffer+2) << ": " << buffer+4 << endl;
+        return true;
+    }
+    return false;    
+}
 
-bool readFromServer(const Arguments& args){
+bool readFromServer(Arguments& args){
 
     struct sockaddr_in server_addr;
 
@@ -75,12 +83,11 @@ bool readFromServer(const Arguments& args){
 
 
     //if there's moidified value of blocksize then modify RRQ packet
-    if(args.blockSize > 512){        
+    if(args.blockSize != 512){        
         memcpy(index, blck, sizeof(blck));
         index += sizeof(blck);
         //converting blockSize in bytes to octets
         string str = to_string(args.blockSize);
-        cout << str << endl;
         memcpy(index,str.c_str(),str.length()+1);
         index += str.length()+1;
     }
@@ -105,8 +112,15 @@ bool readFromServer(const Arguments& args){
             int len = sizeof(session);
             // we get port for the service in the response (1st data packet)
             n = recvfrom(sock, udpBuffer, sizeof(udpBuffer), 0, (struct sockaddr *)&session, (socklen_t *)&len);
-
+            if(checkError(udpBuffer)) return false;
+            //iterate to tsize value
             uint16_t filesize = strtol((char *)(udpBuffer+2+sizeof(transfer)),NULL,10);
+            //iterate to blocksize value
+            uint16_t blocksz = strtol((char *)(udpBuffer+2+sizeof(transfer))+strlen((char *)(udpBuffer+2+sizeof(transfer)))+1+sizeof(blck),NULL,10);
+
+            if(args.blockSize != 512){
+                args.blockSize = blocksz;
+            }
 
             *(uint16_t*)udpBuffer = SWAP((uint16_t)tftpOpcode::ACK);
 
@@ -115,6 +129,7 @@ bool readFromServer(const Arguments& args){
             result = sendto (sock, udpBuffer, 4, 0, (struct sockaddr *)&session, sizeof(session));
 
             n = recvfrom(sock, udpBuffer, sizeof(udpBuffer), 0, (struct sockaddr *)&session, (socklen_t *)&len);
+            if(checkError(udpBuffer)) return false;
             
             if((args.blockSize != 512) && (*(uint16_t*)udpBuffer == SWAP((uint16_t)tftpOpcode::OPT))){
                 
@@ -124,7 +139,8 @@ bool readFromServer(const Arguments& args){
 
                 result = sendto (sock, udpBuffer, 4, 0, (struct sockaddr *)&session, sizeof(session));
                 if(result){
-                    n = recvfrom(sock, udpBuffer, sizeof(udpBuffer), 0, (struct sockaddr *)&session, (socklen_t *)&len);    
+                    n = recvfrom(sock, udpBuffer, sizeof(udpBuffer), 0, (struct sockaddr *)&session, (socklen_t *)&len);
+                    if(checkError(udpBuffer)) return false;    
                 }
                 
             }
@@ -132,7 +148,7 @@ bool readFromServer(const Arguments& args){
             
             x += n-4;
             
-            cout << x << "B transferred" << "\t\r" << flush;
+            //cout << x << "B transferred" << "\t\r" << flush;
                       
             *(uint16_t*)udpBuffer = SWAP((uint16_t)tftpOpcode::ACK);
 
@@ -146,7 +162,7 @@ bool readFromServer(const Arguments& args){
     return true;
 }
 
-bool readFromServerInIPv6(const Arguments& args){
+bool readFromServerInIPv6(Arguments& args){
 
     struct sockaddr_in6 server_addr;
     
@@ -192,12 +208,11 @@ bool readFromServerInIPv6(const Arguments& args){
 
 
     //if there's moidified value of blocksize then modify RRQ packet
-    if(args.blockSize > 512){        
+    if(args.blockSize != 512){        
         memcpy(index, blck, sizeof(blck));
         index += sizeof(blck);
         //converting blockSize in bytes to octets
         string str = to_string(args.blockSize);
-        cout << str << endl;
         memcpy(index,str.c_str(),str.length()+1);
         index += str.length()+1;
     }
@@ -221,8 +236,15 @@ bool readFromServerInIPv6(const Arguments& args){
             int len = sizeof(session);
             // we get port for the service in the response (1st data packet)
             n = recvfrom(sock, udpBuffer, sizeof(udpBuffer), 0, (struct sockaddr *)&session, (socklen_t *)&len);
-
+            if(checkError(udpBuffer)) return false;
+            //iterate to tsize value
             uint16_t filesize = strtol((char *)(udpBuffer+2+sizeof(transfer)),NULL,10);
+            //iterate to blocksize value
+            uint16_t blocksz = strtol((char *)(udpBuffer+2+sizeof(transfer))+strlen((char *)(udpBuffer+2+sizeof(transfer)))+1+sizeof(blck),NULL,10);
+
+            if(args.blockSize != 512){
+                args.blockSize = blocksz;
+            }
 
             *(uint16_t*)udpBuffer = SWAP((uint16_t)tftpOpcode::ACK);
 
@@ -231,6 +253,7 @@ bool readFromServerInIPv6(const Arguments& args){
             result = sendto (sock, udpBuffer, 4, 0, (struct sockaddr *)&session, sizeof(session));
 
             n = recvfrom(sock, udpBuffer, sizeof(udpBuffer), 0, (struct sockaddr *)&session, (socklen_t *)&len);
+            if(checkError(udpBuffer)) return false;
             
             if((args.blockSize != 512) && (*(uint16_t*)udpBuffer == SWAP((uint16_t)tftpOpcode::OPT))){
                 
@@ -240,7 +263,8 @@ bool readFromServerInIPv6(const Arguments& args){
 
                 result = sendto (sock, udpBuffer, 4, 0, (struct sockaddr *)&session, sizeof(session));
                 if(result){
-                    n = recvfrom(sock, udpBuffer, sizeof(udpBuffer), 0, (struct sockaddr *)&session, (socklen_t *)&len);    
+                    n = recvfrom(sock, udpBuffer, sizeof(udpBuffer), 0, (struct sockaddr *)&session, (socklen_t *)&len);
+                    if(checkError(udpBuffer)) return false;    
                 }
                 
             }
@@ -263,7 +287,7 @@ bool readFromServerInIPv6(const Arguments& args){
     return true;
 }
 
-bool writeToServer(const Arguments& args){
+bool writeToServer(Arguments& args){
     struct sockaddr_in server_addr;
 
     int sock = socket(AF_INET,SOCK_DGRAM,IPPROTO_UDP);
@@ -292,6 +316,26 @@ bool writeToServer(const Arguments& args){
         index += sizeof(modeAscii);
     }
 
+    memcpy(index, transfer, sizeof(transfer));
+    index += sizeof(transfer);
+    
+    
+    uint64_t filesize = std::filesystem::file_size(args.filePath);
+    
+    string str = to_string(filesize);
+
+    memcpy(index, str.c_str(),str.length()+1);
+    index += str.length()+1;
+
+    if(args.blockSize != 512){        
+        memcpy(index, blck, sizeof(blck));
+        index += sizeof(blck);
+        //converting blockSize in bytes to octets
+        string str = to_string(args.blockSize);
+        memcpy(index,str.c_str(),str.length()+1);
+        index += str.length()+1;
+    }
+
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(args.port);
     
@@ -305,21 +349,34 @@ bool writeToServer(const Arguments& args){
     ifstream myfile(args.filePath,ios::binary);
     auto result = sendto (sock, udpBuffer, index-udpBuffer, 0, (struct sockaddr *)&server_addr, sizeof(server_addr));
 
-
     cout << "Requesting write to server: " << args.address << " on port: " << args.port << endl;
-    
 
     if (result > 0){      
         
         int n;
         //we need to get the port in the response to know where to send ACK
-        sockaddr_in session; 
+        sockaddr_in6 session; 
         int len = sizeof(session);
         // we get port for the service in the response (1st data packet)
         n = recvfrom(sock, udpBuffer, sizeof(udpBuffer), 0, (struct sockaddr *)&session, (socklen_t *)&len);
+        if(checkError(udpBuffer)) return false;
 
-        if(*((uint16_t*)udpBuffer) == SWAP((uint16_t)tftpOpcode::ACK)){
+        //iterate to tsize value
+        uint16_t filesize = strtol((char *)(udpBuffer+2+sizeof(transfer)),NULL,10);
+        //iterate to blocksize value
+        uint16_t blocksz = strtol((char *)(udpBuffer+2+sizeof(transfer))+strlen((char *)(udpBuffer+2+sizeof(transfer)))+1+sizeof(blck),NULL,10);
+
+        if(args.blockSize != 512){
+            args.blockSize = blocksz;
+        }
+
+
+        if(*((uint16_t*)udpBuffer) == SWAP((uint16_t)tftpOpcode::OPT)){
             cout << "ACK from server, transmitting data..." << endl;   
+        }
+        else {
+            cerr << "Server doesnt have space for the file!" << endl;
+            return false;
         }
 
         uint64_t x = 0;
@@ -349,6 +406,7 @@ bool writeToServer(const Arguments& args){
             int res = sendto (sock, udpBuffer, index-udpBuffer, 0, (struct sockaddr *)&session, sizeof(session));
             if(res){
                 n = recvfrom(sock, udpBuffer, sizeof(udpBuffer), 0, (struct sockaddr *)&session, (socklen_t *)&len);
+                if(checkError(udpBuffer)) return false;
                 if(!n){
                     return false;
                 }
@@ -371,7 +429,7 @@ bool writeToServer(const Arguments& args){
     return true;
 }
 
-bool writeToServerInIPv6(const Arguments& args){
+bool writeToServerInIPv6(Arguments& args){
     struct sockaddr_in6 server_addr;
 
     int sock = socket(AF_INET6,SOCK_DGRAM,IPPROTO_UDP);
@@ -408,6 +466,27 @@ bool writeToServerInIPv6(const Arguments& args){
         index += sizeof(modeAscii);
     }
 
+    memcpy(index, transfer, sizeof(transfer));
+    index += sizeof(transfer);
+    
+    
+    uint64_t filesize = std::filesystem::file_size(args.filePath);
+    
+    string str = to_string(filesize);
+
+    memcpy(index, str.c_str(),str.length()+1);
+    index += str.length()+1;
+
+
+    if(args.blockSize != 512){        
+        memcpy(index, blck, sizeof(blck));
+        index += sizeof(blck);
+        //converting blockSize in bytes to octets
+        string str = to_string(args.blockSize);
+        memcpy(index,str.c_str(),str.length()+1);
+        index += str.length()+1;
+    }
+
     ifstream myfile(args.filePath,ios::binary);
     auto result = sendto (sock, udpBuffer, index-udpBuffer, 0, (struct sockaddr *)&server_addr, sizeof(server_addr));
 
@@ -423,10 +502,25 @@ bool writeToServerInIPv6(const Arguments& args){
         int len = sizeof(session);
         // we get port for the service in the response (1st data packet)
         n = recvfrom(sock, udpBuffer, sizeof(udpBuffer), 0, (struct sockaddr *)&session, (socklen_t *)&len);
+        if(checkError(udpBuffer)) return false;
 
-        if(*((uint16_t*)udpBuffer) == SWAP((uint16_t)tftpOpcode::ACK)){
+        if(*((uint16_t*)udpBuffer) == SWAP((uint16_t)tftpOpcode::OPT)){
             cout << "ACK from server, transmitting data..." << endl;   
         }
+        else {
+            cerr << "Server doesnt have space for the file!" << endl;
+            return false;
+        }
+
+        //iterate to tsize value
+        uint16_t filesize = strtol((char *)(udpBuffer+2+sizeof(transfer)),NULL,10);
+        //iterate to blocksize value
+        uint16_t blocksz = strtol((char *)(udpBuffer+2+sizeof(transfer))+strlen((char *)(udpBuffer+2+sizeof(transfer)))+1+sizeof(blck),NULL,10);
+
+        if(args.blockSize != 512){
+            args.blockSize = blocksz;
+        }
+
 
         uint64_t x = 0;
         uint16_t blockcount = 0;
@@ -455,6 +549,8 @@ bool writeToServerInIPv6(const Arguments& args){
             int res = sendto (sock, udpBuffer, index-udpBuffer, 0, (struct sockaddr *)&session, sizeof(session));
             if(res){
                 n = recvfrom(sock, udpBuffer, sizeof(udpBuffer), 0, (struct sockaddr *)&session, (socklen_t *)&len);
+                if(checkError(udpBuffer)) return false;
+
                 if(!n){
                     return false;
                 }
