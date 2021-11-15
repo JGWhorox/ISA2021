@@ -14,7 +14,7 @@
 #include <cstring>
 //custom
 #include "tftpSocket.h"
-#include "pcapDataTypes.h"
+#include "mytftpclient.h"
 #include "clifunctionality.h"
 
 bool checkError(uint8_t* buffer);

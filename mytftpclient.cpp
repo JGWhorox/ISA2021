@@ -14,7 +14,6 @@
 #include <sys/socket.h>
 
 //custom
-#include "pcapDataTypes.h"
 #include "mytftpclient.h"
 #include "clifunctionality.h"
 #include "tftpSocket.h"

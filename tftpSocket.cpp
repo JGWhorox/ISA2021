@@ -14,7 +14,7 @@
 #include <filesystem>
 //custom
 #include "tftpSocket.h"
-#include "pcapDataTypes.h"
+#include "mytftpclient.h"
 #include "clifunctionality.h"
 
 
@@ -148,7 +148,7 @@ bool readFromServer(Arguments& args){
             
             x += n-4;
             
-            //cout << x << "B transferred" << "\t\r" << flush;
+            cout << x << "B transferred" << "\t\r" << flush;
                       
             *(uint16_t*)udpBuffer = SWAP((uint16_t)tftpOpcode::ACK);
 
