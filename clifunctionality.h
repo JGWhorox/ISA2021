@@ -14,7 +14,7 @@ struct Arguments {
     bool write = false; // if not write then read
     std::string filePath = "";
     int timeout = 5; //in seconds
-    int blockSize = 256;
+    int blockSize = 512;
     bool multicast = false;
     bool binaryMode = true; //of not binary then ascii
     std::string address = "127.0.0.1";   

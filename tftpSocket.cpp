@@ -56,19 +56,31 @@ bool readFromServer(const Arguments& args){
         cerr << "\nInvalid address/ Address not supported \n";
         return -1;
     }
-    ofstream myfile("download");
-    auto result = sendto (sock, udpBuffer, index-udpBuffer, 0, (const struct sockaddr *)&server_addr, sizeof(server_addr));
+
+    string filename = args.filePath.substr(args.filePath.find_last_of("/")+1,args.filePath.length());
+
+    ofstream myfile(filename);
+    auto result = sendto (sock, udpBuffer, index-udpBuffer, 0, (struct sockaddr *)&server_addr, sizeof(server_addr));
     if (result > 0){      
         int n;
         do{
-            n = recvfrom(sock, udpBuffer, sizeof(udpBuffer), 0, nullptr, nullptr);
+            //we need to get the port in the response to know where to send ACK
+            sockaddr_in client; 
+            int len = sizeof(client);
             
-            myfile.write((const char*)(udpBuffer+sizeof(tftpRcv)),n-4);
+            n = recvfrom(sock, udpBuffer, sizeof(udpBuffer), 0, (struct sockaddr *)&client, (socklen_t *)&len);
 
-            *((uint16_t*)udpBuffer) = SWAP((uint16_t)tftpOpcode::ACK);
-            result = sendto (sock, udpBuffer, 4, 0, (const struct sockaddr *)&server_addr, sizeof(server_addr));
+            cout << n << endl;
+            
+            myfile.write((const char*)(index+sizeof(tftpRcv)),n-4);
+            
+            cout << "received block n: " <<  SWAP((uint16_t)((tftpRcv*)udpBuffer)->blockid) << endl;           
 
-        }while(n >= 512+4); // add blocksize later
+            *(uint16_t*)udpBuffer = SWAP((uint16_t)tftpOpcode::ACK);
+
+            sendto (sock, udpBuffer, 4, 0, (struct sockaddr *)&client, sizeof(client));
+
+        }while(n == args.blockSize+4); // add blocksize later
         myfile.close();
     }
 

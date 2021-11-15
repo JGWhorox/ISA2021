@@ -103,10 +103,10 @@ struct tftpRcv{
 
 enum tftpOpcode: uint16_t{
     RRQ = 1,
-    WRQ,
-    DAT,
-    ACK,
-    ERR
+    WRQ = 2,
+    DAT = 3,
+    ACK = 4,
+    ERR = 5
 };
 
 
