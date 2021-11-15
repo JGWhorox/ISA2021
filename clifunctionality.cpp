@@ -26,7 +26,7 @@ std::vector<string> split(string input){
     return retvals;
 }
 
-void printDebug(Arguments &args){
+void printDebug(const Arguments &args){
     cout << "############## DEBUG INFO ##############" << endl;
     cout << "write?: \t" << args.write << endl;
     cout << "file path:\t" << args.filePath << endl;
@@ -36,6 +36,7 @@ void printDebug(Arguments &args){
     cout << "bin mode?:\t" << args.binaryMode << endl;
     cout << "address:\t" << args.address << endl;
     cout << "port:   \t" << args.port << endl;
+    cout << "ipv4?:\t\t" << args.ipv4 << endl;
     cout << "############# END OF DEBUG #############" << endl;
 }
 
@@ -146,6 +147,10 @@ bool parseArgs(Arguments &args, string input){
                 if(!regex_match(port, regex_port)){
                     cerr << "Invalid port number!\n";
                     return false;
+                }
+
+                if(regex_match(address,regex_ipv6)){
+                    args.ipv4 = false;
                 }
 
                 uint16_t convertedPort = stoi(port);

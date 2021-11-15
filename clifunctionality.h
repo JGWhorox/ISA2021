@@ -27,6 +27,8 @@ std::vector<std::string> split(std::string input);
 
 void printHelp();
 
+void printDebug(const Arguments &args);
+
 bool parseArgs(Arguments &args, std::string input);
 
 #endif
