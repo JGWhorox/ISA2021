@@ -165,7 +165,7 @@ bool writeToServer(const Arguments& args){
 
             *(uint16_t*)index = SWAP(blockcount);
             index += 2;
-            cout << "blockcount: " << blockcount << endl;
+            
             char tmpBuffer[args.blockSize];
 
             myfile.read(tmpBuffer, sizeof(tmpBuffer));
@@ -188,7 +188,8 @@ bool writeToServer(const Arguments& args){
                     return false;
                 }
                 if(*((uint16_t*)udpBuffer) == SWAP((uint16_t)tftpOpcode::ACK)){
-                    cout << "ACK for block n: " << blockcount << " received!" << endl; 
+                    x += myfile.gcount();
+                    cout << x << "B transferred" << "\t\r" << flush;
                 }
             }
 
